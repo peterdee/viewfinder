@@ -77,7 +77,7 @@ function Server({navigation}: ServerProps): JSX.Element {
       )}
       {!connected && (
         <StyledButton disabled={loading} onPress={handleCreateServer}>
-          <Text style={styles.buttonText}>Create server</Text>
+          <Text style={styles.buttonText}>Start server</Text>
         </StyledButton>
       )}
       <StyledButton
