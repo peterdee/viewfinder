@@ -42,10 +42,10 @@ function Main({navigation}: MainProps): JSX.Element {
           <Text style={styles.buttonText}>Create client</Text>
         </StyledButton>
       </View>
-      <View>
+      <View style={styles.address}>
         <Text>{IPAddress}</Text>
       </View>
-      <View>
+      <View style={styles.address}>
         <Text>{IPV4Address}</Text>
       </View>
     </View>

@@ -3,6 +3,9 @@ import {StyleSheet} from 'react-native';
 import {SPACER} from '../../constants';
 
 export default StyleSheet.create({
+  address: {
+    marginTop: SPACER,
+  },
   buttonText: {
     color: 'black',
     textAlign: 'center',
