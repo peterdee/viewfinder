@@ -3,6 +3,7 @@ import {Text, View} from 'react-native';
 import TcpSocket from 'react-native-tcp-socket';
 
 import {CONNECTION, SPACER} from '../../constants';
+import {serverLog} from '../../utilities/logger';
 import type {ServerProps} from '../../types/navigation';
 import StyledButton from '../../components/StyledButton';
 import styles from './styles';
@@ -22,15 +23,17 @@ function Server({navigation}: ServerProps): JSX.Element {
     const TCPServer = TcpSocket.createServer(socket => {
       // handlers
       socket.on('data', data => {
+        serverLog('incoming', data.toString());
         socket.write('Echo server ' + data);
       });
+      socket.emit('data', 'response');
 
       socket.on('error', error => {
-        console.log('An error ocurred with client socket ', error);
+        serverLog('An error ocurred with client socket ', error);
       });
 
       socket.on('close', error => {
-        console.log('Closed connection with ', socket.address(), error);
+        serverLog('Closed connection with ', socket.address(), error);
       });
     }).listen({
       host: CONNECTION.serverHost,
@@ -38,7 +41,7 @@ function Server({navigation}: ServerProps): JSX.Element {
     });
 
     TCPServer.on('listening', (): void => {
-      console.log(
+      serverLog(
         'started server on',
         CONNECTION.serverHost,
         ':',
@@ -50,11 +53,11 @@ function Server({navigation}: ServerProps): JSX.Element {
     });
 
     TCPServer.on('error', error => {
-      console.log('An error ocurred with the server', error);
+      serverLog('An error ocurred with the server:', error, CONNECTION);
     });
 
     TCPServer.on('close', () => {
-      console.log('Server closed connection');
+      serverLog('Server closed connection');
     });
   }, [connected]);
 

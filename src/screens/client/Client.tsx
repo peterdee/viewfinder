@@ -7,6 +7,7 @@ import {
 import {StyleSheet, Text, View} from 'react-native';
 import TcpSocket from 'react-native-tcp-socket';
 
+import {clientLog} from '../../utilities/logger';
 import type {ClientProps} from '../../types/navigation';
 import {CONNECTION, SPACER} from '../../constants';
 import StyledButton from '../../components/StyledButton';
@@ -14,11 +15,11 @@ import styles from './styles';
 
 function Client({navigation}: ClientProps): JSX.Element {
   const [cameraPermission, setCameraPermission] = useState<boolean>(false);
+  const [client, setClient] = useState<TcpSocket.Socket | null>(null);
   const [connected, setConnected] = useState<boolean>(false);
-  const [client, setClient] = useState<TcpSocket.Socket>();
   const [loading, setLoading] = useState<boolean>(false);
 
-  const cameraDevice = useCameraDevices().back;
+  const cameraDevice = useCameraDevices().back || null;
   const cameraRef = useRef<Camera | null>(null);
 
   const handleCreateClient = useCallback(async (): Promise<null | void> => {
@@ -33,43 +34,54 @@ function Client({navigation}: ClientProps): JSX.Element {
       return setCameraPermission(false);
     }
 
+    console.log('before client', client);
     if (!client) {
       setLoading(true);
       const options = {
-        host: '127.0.0.1',
-        localAddress: '127.0.0.1',
+        host: '192.168.43.1',
+        // host: '127.0.0.1',
+        // localAddress: '192.168.43.1',
+        // localAddress: '127.0.0.1',
         port: CONNECTION.port,
-        reuseAddress: true,
+        // reuseAddress: true,
         // localPort: 20000,
-        // interface: "wifi",
+        // interface: 'wifi' as ConnectionInterface,
       };
 
       // Create socket
       const TCPClient = TcpSocket.createConnection(options, () => {
         // Write on the socket
-        console.log('here');
+        clientLog('client is running');
         TCPClient.write('Hello server!');
-        console.log(TCPClient.readyState);
+        clientLog(TCPClient.readyState);
+        TCPClient.emit('data', 'hello server');
 
+        TCPClient.on('data', (data: string | Buffer) => {
+          clientLog('received', data.toString());
+        });
         // Close socket
         // client.destroy();
-        TCPClient.on('connect', () => console.log('connected'));
-        TCPClient.on('error', e => console.log('err', e));
+        TCPClient.on('connect', () => clientLog('connected'));
+        TCPClient.on('error', e => clientLog('err', e));
         setClient(TCPClient);
+        setConnected(true);
+        setLoading(false);
       });
+      TCPClient.on('error', e => clientLog(e));
     }
   }, [client]);
 
   const handleStopClient = useCallback((): void => {
     if (connected && client) {
       client.destroy();
+      setClient(null);
       setConnected(false);
     }
   }, [client, connected]);
 
   return (
     <View style={styles.wrap}>
-      {cameraPermission && (
+      {cameraPermission && cameraDevice && (
         <Camera
           device={cameraDevice as CameraDevice}
           isActive
@@ -78,7 +90,7 @@ function Client({navigation}: ClientProps): JSX.Element {
           video
         />
       )}
-      {cameraPermission && connected && (
+      {connected && (
         <StyledButton disabled={loading} onPress={handleStopClient}>
           <Text style={styles.buttonText}>Stop client</Text>
         </StyledButton>
