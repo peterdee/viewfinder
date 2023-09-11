@@ -42,6 +42,14 @@ function Main({navigation}: MainProps): JSX.Element {
           <Text style={styles.buttonText}>Create client</Text>
         </StyledButton>
       </View>
+      <StyledButton
+        customStyles={{
+          marginTop: SPACER,
+          width: SPACER * 9,
+        }}
+        onPress={(): void => navigation.navigate('CameraTest')}>
+        <Text style={styles.buttonText}>Camera test</Text>
+      </StyledButton>
       <View style={styles.address}>
         <Text>{IPAddress}</Text>
       </View>
