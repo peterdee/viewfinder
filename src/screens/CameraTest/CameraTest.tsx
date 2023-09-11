@@ -1,10 +1,8 @@
-import React, {memo, useCallback, useEffect, useRef, useState} from 'react';
+import React, {memo, useEffect, useState} from 'react';
 import {
   Camera,
-  type CameraDevice,
   type CameraPermissionRequestResult,
   useCameraDevices,
-  PhotoFile,
   useFrameProcessor,
   Frame,
 } from 'react-native-vision-camera';
@@ -21,27 +19,11 @@ function CameraTest({navigation}: CameraTestProps): JSX.Element {
   const [permissionError, setPermissionError] = useState<boolean>(false);
 
   const cameraDevice = useCameraDevices().back || null;
-  const cameraRef = useRef<Camera | null>(null);
 
   const frameProcessor = useFrameProcessor((frame: Frame): void => {
     'worklet';
-    console.log('got frame', frame);
+    console.log('got frame', frame, 123);
   }, []);
-
-  const handleCameraInitialization = useCallback((): void => {
-    if (cameraRef && cameraRef.current) {
-      const {current} = cameraRef;
-      current
-        .takePhoto({
-          enableAutoStabilization: true,
-          enableShutterSound: false,
-          flash: 'off',
-          qualityPrioritization: 'quality',
-        })
-        .then((photo: PhotoFile): void => console.log('photo taken', photo))
-        .catch((error: Error): void => console.log('photo error', error));
-    }
-  }, [cameraRef]);
 
   useEffect((): void => {
     Camera.requestCameraPermission()
@@ -72,9 +54,6 @@ function CameraTest({navigation}: CameraTestProps): JSX.Element {
                   device={cameraDevice}
                   frameProcessor={frameProcessor}
                   isActive
-                  onInitialized={handleCameraInitialization}
-                  photo
-                  ref={cameraRef}
                   style={StyleSheet.absoluteFill}
                 />
               )}
